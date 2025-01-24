@@ -1,23 +1,15 @@
 # Orders Data Analysis
-
 This repository contains the Orders Data Analysis project, which demonstrates skills in data wrangling, visualization, and Python programming, alongside SQL queries for data analysis.
 
 ## Files
-
 ### `data_analysis_project.ipynb`
 This Jupyter Notebook contains Python code for analyzing and visualizing the `orders.csv` dataset.
 
 #### Key Features:
-1. **Data Loading and Cleaning**: The dataset is loaded and cleaned to remove duplicates.
-2. **Data Visualization**: Insights are derived from the data using visualizations.
-3. **Aggregations**: Sales data is grouped and analyzed based on order status.
-
-#### Code Examples:
+1. **Data Loading and Cleaning**
 ```python
 # Importing libraries
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Loading the dataset
 orders = pd.read_csv('orders.csv')
@@ -27,25 +19,31 @@ orders = orders.drop_duplicates()
 
 # Displaying the first few rows of the dataset
 print(orders.head())
+```
+
+2. **Data Visualization**
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Visualizing order status distribution
 sns.countplot(data=orders, x='order_status')
 plt.title('Order Status Distribution')
 plt.show()
 
-# Analyzing total sales by status
-sales_by_status = orders.groupby('order_status')['total_amount'].sum()
-print("Total Sales by Status:")
-print(sales_by_status)
-
 # Visualizing order category distribution
 sns.countplot(data=orders, x='category')
 plt.title('Order Category Distribution')
 plt.show()
 ```
-The above code provides a step-by-step approach to loading, cleaning, and analyzing the dataset, along with visualizations to understand key trends.
 
----
+3. **Data Aggregation**
+```python
+# Analyzing total sales by status
+sales_by_status = orders.groupby('order_status')['total_amount'].sum()
+print("Total Sales by Status:")
+print(sales_by_status)
+```
 
 ### `orders.csv`
 This CSV file contains raw data for the analysis, including columns such as:
@@ -64,22 +62,19 @@ order_id,customer_id,order_status,order_date,total_amount,category
 3,125,Pending,2023-01-03,150.20,Groceries
 ```
 
----
-
 ### `sql_code.sql`
-This SQL script contains queries to analyze the dataset. The following are key queries included in the file:
+This SQL script contains queries to analyze the dataset.
 
 #### Example Queries:
-1. **Calculate Total Sales by Order Status**:
+1. **Calculate Total Sales by Order Status**
 ```sql
 SELECT order_status, SUM(total_amount) AS total_sales
 FROM orders
 GROUP BY order_status
 ORDER BY total_sales DESC;
 ```
-This query calculates the total sales for each order status and sorts the results in descending order of sales.
 
-2. **Find Top 5 Customers by Total Spend**:
+2. **Find Top 5 Customers by Total Spend**
 ```sql
 SELECT customer_id, SUM(total_amount) AS total_spend
 FROM orders
@@ -87,18 +82,14 @@ GROUP BY customer_id
 ORDER BY total_spend DESC
 LIMIT 5;
 ```
-This query identifies the top 5 customers based on their total spending.
 
-3. **Analyze Monthly Sales Trends**:
+3. **Analyze Monthly Sales Trends**
 ```sql
 SELECT DATE_FORMAT(order_date, '%Y-%m') AS month, SUM(total_amount) AS monthly_sales
 FROM orders
 GROUP BY month
 ORDER BY month;
 ```
-This query provides monthly sales trends, making it easier to track performance over time.
-
----
 
 ## Getting Started
 1. Clone the repository:
@@ -108,8 +99,6 @@ This query provides monthly sales trends, making it easier to track performance 
    ```
 2. Open the Jupyter Notebook to explore the Python code and results.
 3. Use your preferred SQL client to run the queries from `sql_code.sql`.
-
----
 
 ## Contribution
 Contributions are welcome! Feel free to fork the repository and submit pull requests for improvements or additional features.
