@@ -9,72 +9,87 @@ This Jupyter Notebook contains Python code for analyzing and visualizing the `or
 
 1. **Data Loading and Cleaning**
    ```python
-   # Importing libraries
+   #read data from the file and handle null values
+
    import pandas as pd
-
-   # Loading the dataset
-   orders = pd.read_csv('orders.csv')
-   
-   # Data cleaning: Dropping duplicates
-   orders = orders.drop_duplicates()
-
-   # Displaying the first few rows of the dataset
-   print(orders.head())
+   df = pd.read_csv('orders.csv', na_values=['Not Available', 'unknown'])
+   df['Ship Mode'].unique()
    ```
-   - **Importing libraries**: The code imports the `pandas` library to handle data.
-   - **Loading the dataset**: Reads the `orders.csv` file into a DataFrame.
-   - **Dropping duplicates**: Removes duplicate rows to ensure data integrity.
-   - **Displaying rows**: Outputs the first five rows to verify the dataset.
+   Importing libraries: The code imports the pandas library to handle data.
 
-2. **Data Visualization**
+   Loading the dataset: Reads the orders.csv file into a DataFrame and treats specific strings as missing values.
+
+   Inspecting a column: Displays unique values in the Ship Mode column.
+
+2. **Column Normalization**
+   ```python
+   #rename columns names ..make them lower case and replace space with underscore
+
+   df.rename(columns={'Order Id': 'order_id', 'City': 'city'})
+   df.columns = df.columns.str.lower()
+   df.columns = df.columns.str.replace(' ', '_')
+   df.head(5)
+   ```
+   Renaming columns: Standardizes column names to lowercase and replaces spaces with underscores.
+
+3. **Basic Analysis**
+   ```python
+   df['segment'].value_counts()
+   ```
+   Segment distribution: Analyzes frequency of values in the segment column.
+
+4. **Data Visualization**
    ```python
    import matplotlib.pyplot as plt
    import seaborn as sns
 
-   # Visualizing order status distribution
-   sns.countplot(data=orders, x='order_status')
-   plt.title('Order Status Distribution')
-   plt.show()
-   ```
-   - **Importing libraries**: Imports `matplotlib.pyplot` and `seaborn` for creating visualizations.
-   - **Order status distribution**: Uses a count plot to show the frequency of each order status.
-   - **Title and display**: Adds a title and displays the plot.
+   # Displaying the first few rows
+   print(df.head())
 
-   ```python
    # Visualizing order category distribution
-   sns.countplot(data=orders, x='category')
+   sns.countplot(data=df, x='category')
    plt.title('Order Category Distribution')
    plt.show()
    ```
-   - **Order category distribution**: Similar to the previous snippet, this visualizes the frequency of orders in each category.
-   - **Title and display**: Adds a title and displays the plot.
+   Importing libraries: Imports matplotlib.pyplot and seaborn for creating visualizations.
 
-3. **Data Aggregation**
+   Sample data: Prints the top rows to verify the data structure.
+
+   Order category distribution: Uses a count plot to show the frequency of each category.
+
+   Title and display: Adds a title and displays the plot.
+
+5. **Feature Engineering**
    ```python
-   # Analyzing total sales by status
-   sales_by_status = orders.groupby('order_status')['total_amount'].sum()
-   print("Total Sales by Status:")
-   print(sales_by_status)
+   #derive new columns discount , sale price and profit
+
+   df['discount'] = df['list_price'] * df['discount_percent'] * 0.01
+   df['sale_price'] = df['list_price'] - df['discount']
+   df['profit'] = df['sale_price'] - df['cost_price']
+   df
    ```
-   - **Grouping data**: Groups the dataset by `order_status`.
-   - **Calculating total sales**: Sums up the `total_amount` for each status.
-   - **Printing results**: Displays total sales for each order status.
+   Derived columns: Calculates the discount, final sale price after discount, and profit by subtracting cost price from sale price.
+
+   Final output: Displays the updated DataFrame with new columns.
 
 ### `orders.csv`
 This CSV file contains raw data for the analysis, including columns such as:
+
 - `order_id`: Unique identifier for each order.
 - `customer_id`: Unique identifier for each customer.
-- `order_status`: Current status of the order (e.g., Completed, Cancelled).
 - `order_date`: Date when the order was placed.
-- `total_amount`: Total value of the order.
+- `list_price`: Listed price before any discount.
+- `discount_percent`: Percentage discount applied.
+- `cost_price`: Cost to the company.
+- `segment`: Customer segment.
 - `category`: Category of the order.
 
 Example:
 ```csv
-order_id,customer_id,order_status,order_date,total_amount,category
-1,123,Completed,2023-01-01,100.50,Electronics
-2,124,Cancelled,2023-01-02,200.75,Apparel
-3,125,Pending,2023-01-03,150.20,Groceries
+order_id,customer_id,order_date,list_price,discount_percent,cost_price,segment,category
+1,123,2023-01-01,100.50,10,80.00,Consumer,Electronics
+2,124,2023-01-02,200.75,5,150.00,Corporate,Apparel
+3,125,2023-01-03,150.20,15,120.00,Home Office,Groceries
 ```
 
 ### `sql_code.sql`
@@ -89,9 +104,11 @@ This SQL script contains queries to analyze the dataset.
    GROUP BY order_status
    ORDER BY total_sales DESC;
    ```
-   - **Group by order status**: Aggregates sales based on `order_status`.
-   - **Calculate total sales**: Sums up the `total_amount` for each status.
-   - **Sort results**: Orders the statuses by total sales in descending order.
+   Group by order status: Aggregates sales based on order_status.
+
+   Calculate total sales: Sums up the total_amount for each status.
+
+   Sort results: Orders the statuses by total sales in descending order.
 
 2. **Find Top 5 Customers by Total Spend**
    ```sql
@@ -101,9 +118,11 @@ This SQL script contains queries to analyze the dataset.
    ORDER BY total_spend DESC
    LIMIT 5;
    ```
-   - **Group by customer ID**: Aggregates sales for each customer.
-   - **Calculate total spend**: Sums up the `total_amount` for each customer.
-   - **Sort and limit**: Orders customers by their total spending and selects the top 5.
+   Group by customer ID: Aggregates sales for each customer.
+
+   Calculate total spend: Sums up the total_amount for each customer.
+
+   Sort and limit: Orders customers by their total spending and selects the top 5.
 
 3. **Analyze Monthly Sales Trends**
    ```sql
@@ -112,18 +131,21 @@ This SQL script contains queries to analyze the dataset.
    GROUP BY month
    ORDER BY month;
    ```
-   - **Format dates**: Extracts the year and month from `order_date`.
-   - **Calculate monthly sales**: Sums up the `total_amount` for each month.
-   - **Sort results**: Orders the months chronologically.
+   Format dates: Extracts the year and month from order_date.
+
+   Calculate monthly sales: Sums up the total_amount for each month.
+
+   Sort results: Orders the months chronologically.
 
 ## Getting Started
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/orders-data-analysis.git
-   cd orders-data-analysis
-   ```
-2. Open the Jupyter Notebook to explore the Python code and results.
-3. Use your preferred SQL client to run the queries from `sql_code.sql`.
+Clone the repository:
+```bash
+git clone https://github.com/your-username/orders-data-analysis.git
+cd orders-data-analysis
+```
+Open the Jupyter Notebook to explore the Python code and results.
+
+Use your preferred SQL client to run the queries from `sql_code.sql`.
 
 ## Contribution
 Contributions are welcome! Feel free to fork the repository and submit pull requests for improvements or additional features.
